@@ -21,6 +21,25 @@ The workflow automatically:
 ---
 
 ## 📌 Overview
+---
+
+## 🚀 Business Problem
+
+Managing email manually is time-consuming and inefficient.
+
+Important customer requests can be overlooked, invoices mixed with newsletters, and urgent support emails delayed.
+
+Businesses need an automated way to organize incoming emails without spending time sorting them manually.
+
+---
+
+## 💡 Solution
+
+AI Email Assistant automatically processes every incoming email using OpenAI.
+
+The workflow analyzes the email content, determines its category, assigns the appropriate Gmail label, detects priority, identifies whether action is required, generates a short summary and stores the results in Google Sheets.
+
+The entire process runs automatically without manual intervention.
 
 AI Email Assistant helps businesses organize incoming email automatically.
 
