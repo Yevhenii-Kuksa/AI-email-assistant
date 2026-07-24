@@ -27,3 +27,4 @@ AI Email Assistant helps businesses organize incoming email automatically.
 Instead of manually sorting invoices, customer requests, notifications, newsletters and personal messages, the workflow uses OpenAI to analyze every email and perform intelligent classification.
 
 The result is a clean Gmail inbox, automatic labeling and a structured database that can be used for reporting, dashboards or CRM integrations.
+
