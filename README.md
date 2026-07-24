@@ -34,6 +34,51 @@ Businesses need an automated way to organize incoming emails without spending ti
 ---
 
 ## 💡 Solution
+---
+
+## ✨ Features
+
+- AI-powered email classification
+- Automatic Gmail label assignment
+- Priority detection (High / Medium / Low)
+- Action required detection
+- AI-generated email summaries
+- Multi-language support
+- Automatic Google Sheets logging
+- Fully automated n8n workflow
+
+---
+
+## 🏗️ Architecture
+
+```
+                Incoming Email
+                       │
+                       ▼
+               Gmail Trigger
+                       │
+                       ▼
+              OpenAI Analysis
+                       │
+                       ▼
+             JavaScript Processing
+                  │            │
+                  ▼            ▼
+         Gmail Labels    Google Sheets
+```
+
+---
+
+## ⚙️ Technology Stack
+
+- **Workflow Automation:** n8n
+- **AI:** OpenAI GPT-4o
+- **Email:** Gmail API
+- **Database:** Google Sheets
+- **Infrastructure:** Docker
+- **Reverse Proxy:** Traefik
+- **Database Engine:** PostgreSQL
+- **Hosting:** Ubuntu VPS
 
 AI Email Assistant automatically processes every incoming email using OpenAI.
 
