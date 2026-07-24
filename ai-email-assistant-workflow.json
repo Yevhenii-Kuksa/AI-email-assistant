@@ -1,0 +1,327 @@
+{
+  "name": "AI Email Assistant — Gmail Classification",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "aa2c1098-6c09-4d09-9f9d-cca04e6c99e6",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "70ltUogjeISiSEKj",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1ac73690-db9f-4dd5-9a7f-bc8b53fc081d",
+              "name": "From",
+              "value": "={{ $json.From }}",
+              "type": "string"
+            },
+            {
+              "id": "7a97ea73-7c48-4c73-a14a-89d097ae72f7",
+              "name": "Subject",
+              "value": "={{ $json.Subject }}",
+              "type": "string"
+            },
+            {
+              "id": "e17f76bb-9710-438f-a7db-58b53a074ac0",
+              "name": "snippet",
+              "value": "={{ $json.snippet }}",
+              "type": "string"
+            },
+            {
+              "id": "e735aa2a-2c1d-4f3e-a8d1-3d5106323ea5",
+              "name": "id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "f0c92854-17f8-4ad0-b355-a697f242f469",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-5-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-5-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=You are an AI Email Assistant for business.\n\nAnalyze the email and return ONLY valid JSON.\n\nEmail:\n\nFrom: {{$json[\"From\"]}}\n\nSubject: {{$json[\"Subject\"]}}\n\nSnippet: {{$json[\"snippet\"]}}\n\nTasks:\n\n1. Detect the language of the email automatically.\n\n2. Classify the email into ONE category:\n- AI/Support\n- AI/Billing\n- AI/Sales\n- AI/Orders\n- AI/Work\n- AI/Personal\n- AI/Marketing\n- AI/Newsletter\n- AI/Notifications\n- AI/Spam\n- AI/Other\n\n3. Set priority:\n- High = urgent, payment, customer issue, legal matter, important business request\n- Medium = requires attention but is not urgent\n- Low = informational, newsletter or personal\n\n4. Write a summary:\n- Maximum 20 words.\n- Focus only on the key point.\n- Do NOT repeat the whole email.\n- Write the summary in the SAME LANGUAGE as the email.\n\n5. requires_action:\nReturn true only if a human should reply or perform an action.\nOtherwise return false.\n\nReturn ONLY this JSON:\n\n{\n  \"category\": \"\",\n  \"priority\": \"\",\n  \"summary\": \"\",\n  \"requires_action\": true\n}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        416,
+        0
+      ],
+      "id": "dca42ba0-64b7-436b-af91-f93450cba72a",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "XOnWPHbFysI2jb0n",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.first().json.output[0].content[0].text;\nconst parsed = JSON.parse(response);\n\nconst email = $(\"Edit Fields\").first().json;\n\nconst labelMap = {\n  \"AI/Orders\": \"Label_1835044198996308257\",\n  \"AI/Work\": \"Label_2493597732039766903\",\n  \"AI/Billing\": \"Label_3162581820128751293\",\n  \"AI/Personal\": \"Label_5058720270223141726\",\n  \"AI/Support\": \"Label_5381739352959915487\",\n  \"AI/Sales\": \"Label_6601621660173406268\",\n  \"AI/Marketing\": \"Label_7773279605519753797\",\n  \"AI/Other\": \"Label_7848458115835989925\",\n  \"AI/Spam\": \"Label_8316195166832284121\",\n  \"AI/Notifications\": \"Label_8937417686375835306\",\n  \"AI/Newsletter\": \"Label_918897183596034797\"\n};\n\nconst labelId = labelMap[parsed.category] || labelMap[\"AI/Other\"];\n\nreturn [\n  {\n    json: {\n      date: new Date().toISOString(),\n      id: email.id || \"\",\n      from: email.From || email.from || \"\",\n      subject: email.Subject || email.subject || \"\",\n      text: email.Text || email.text || email.snippet || \"\",\n      category: parsed.category,\n      labelId,\n      priority: parsed.priority,\n      summary: parsed.summary,\n      requires_action: parsed.requires_action\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        768,
+        0
+      ],
+      "id": "900464e8-52ee-4047-bbcd-1a7348056e8f",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1eZhZ_5-FQqNxb9mOgStPxaoFgKFNCiSZS0O7hy5cJ-o",
+          "mode": "list",
+          "cachedResultName": "AI Email Assistant",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1eZhZ_5-FQqNxb9mOgStPxaoFgKFNCiSZS0O7hy5cJ-o/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Лист1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1eZhZ_5-FQqNxb9mOgStPxaoFgKFNCiSZS0O7hy5cJ-o/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Date": "={{$now}}",
+            "From": "={{$node[\"Edit Fields\"].json[\"From\"]}}",
+            "Subject": "={{$node[\"Edit Fields\"].json[\"Subject\"]}}",
+            "Category": "={{$json.category}}",
+            "Priority": "={{$json.priority}}",
+            "Summary": "={{$json.summary}}",
+            "Requires Action": "={{$json.requires_action}}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "From",
+              "displayName": "From",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Subject",
+              "displayName": "Subject",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Priority",
+              "displayName": "Priority",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Summary",
+              "displayName": "Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Requires Action",
+              "displayName": "Requires Action",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1120,
+        -192
+      ],
+      "id": "ef823c7c-6486-4c5d-b627-3808a5e0353b",
+      "name": "Append row in sheet",
+      "retryOnFail": false,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "rrrDAKRjfMzaiF8h",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{$json.id}}",
+        "labelIds": "={{$json.labelId}}"
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1024,
+        80
+      ],
+      "id": "74755dff-539b-4836-84d5-b4e9ad84a08e",
+      "name": "Add label to message",
+      "webhookId": "1800ecc9-a562-45eb-b3b8-6d323bf8e161",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "70ltUogjeISiSEKj",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Add label to message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "256973f2-9009-4944-ae88-8a88084b9bb3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d5ff540a2eba156d137a65737ddfb25fca713c6ce18e96cbe29f16ae6b56d55c"
+  },
+  "nodeGroups": [],
+  "id": "nKil2axzQ90243wT",
+  "tags": []
+}
